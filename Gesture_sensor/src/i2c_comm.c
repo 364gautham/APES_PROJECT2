@@ -12,7 +12,7 @@
 #include "driverlib/i2c.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
-#include "i2c_comm.h"
+#include "include/i2c_comm.h"
 
 bool i2c_read(uint8_t reg, uint8_t *temp)
 {

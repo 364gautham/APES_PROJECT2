@@ -13,11 +13,11 @@
 #include "driverlib/i2c.h"
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
-#include "gesture_sensor.h"
+#include "include/gesture_sensor.h"
 #include "utils/uartstdio.h"
 #include "driverlib/uart.h"
 #include "driverlib/rom.h"
-#include "i2c_comm.h"
+#include "include/i2c_comm.h"
 
 #define SYSTEM_CLOCK 32000000U
 

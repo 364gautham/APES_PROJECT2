@@ -5,10 +5,10 @@
  *      Author: KiranHegde
  */
 
-#include "gesture_sensor.h"
+#include "include/gesture_sensor.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include "i2c_comm.h"
+#include "include/i2c_comm.h"
 #include "driverlib/sysctl.h"
 #include "utils/uartstdio.h"
 #include "driverlib/uart.h"

@@ -117,5 +117,6 @@ driverlib \
 ewarm/Exe \
 gcc \
 rvmdk \
+src \
 utils \
 

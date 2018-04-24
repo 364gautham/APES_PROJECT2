@@ -1,7 +1,7 @@
 ******************************************************************************
                   TI ARM Linker PC v16.9.4                     
 ******************************************************************************
->> Linked Tue Apr 24 00:55:40 2018
+>> Linked Tue Apr 24 01:01:55 2018
 
 OUTPUT FILE NAME:   <Gesture_sensor.out>
 ENTRY POINT SYMBOL: "_c_int00"  address: 0000466d
@@ -138,12 +138,9 @@ MODULE SUMMARY
        Module                          code    ro data   rw data
        ------                          ----    -------   -------
     .\
-       gesture_sensor.obj              3644    0         164    
        tm4c1294ncpdt_startup_ccs.obj   12      520       0      
-       i2c_comm.obj                    484     0         0      
-       main.obj                        404     0         5      
     +--+-------------------------------+-------+---------+---------+
-       Total:                          4544    520       169    
+       Total:                          12      520       0      
                                                                 
     .\driverlib\
        sysctl.obj                      3982    596       0      
@@ -154,6 +151,13 @@ MODULE SUMMARY
        cpu.obj                         62      0         0      
     +--+-------------------------------+-------+---------+---------+
        Total:                          11368   1696      620    
+                                                                
+    .\src\
+       gesture_sensor.obj              3644    0         164    
+       i2c_comm.obj                    484     0         0      
+       main.obj                        404     0         5      
+    +--+-------------------------------+-------+---------+---------+
+       Total:                          4532    0         169    
                                                                 
     .\utils\
        uartstdio.obj                   1180    46        5      
