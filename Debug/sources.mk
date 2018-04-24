@@ -113,6 +113,7 @@ PDE_DEPS__QUOTED :=
 SUBDIRS := \
 . \
 ccs/Debug \
+driverlib \
 ewarm/Exe \
 gcc \
 rvmdk \

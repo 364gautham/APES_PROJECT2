@@ -8,9 +8,8 @@
 #ifndef GESTURE_SENSOR_H_
 #define GESTURE_SENSOR_H_
 
-#define I2C_BASE I2C0_BASE
-/* APDS-9960 I2C address */
-#define SLAVE_ADDRESS       0x39
+#include <stdint.h>
+#include <stdbool.h>
 
 #define UART_CLOCK (16000000U)
 #define GESTURE_EN (0x1<<6)
@@ -180,7 +179,8 @@
 #define DEFAULT_GCONF3          0       // All photodiodes active during gesture
 #define DEFAULT_GIEN            0 // Disable gesture interrupts
 
-typedef struct gesture_data_type {
+typedef struct gesture_data_type
+{
     uint8_t u_data[32];
     uint8_t d_data[32];
     uint8_t l_data[32];
@@ -193,15 +193,16 @@ typedef struct gesture_data_type {
 
 gesture_data_type gesture_data_;
 int gesture_ud_delta_;
-    int gesture_lr_delta_;
-    int gesture_ud_count_;
-    int gesture_lr_count_;
-    int gesture_near_count_;
-    int gesture_far_count_;
-    int gesture_state_;
+int gesture_lr_delta_;
+int gesture_ud_count_;
+int gesture_lr_count_;
+int gesture_near_count_;
+int gesture_far_count_;
+int gesture_state_;
 int gesture_motion_;
 
-enum {
+enum
+{
   DIR_NONE,
   DIR_LEFT,
   DIR_RIGHT,
@@ -213,11 +214,40 @@ enum {
 };
 
 /* State definitions */
-enum {
+enum
+{
   NA_STATE,
   NEAR_STATE,
   FAR_STATE,
   ALL_STATE
 };
+
+
+bool setLEDDrive(uint8_t drive);
+bool setProximityGain(uint8_t drive);
+bool setAmbientLightGain(uint8_t drive);
+bool setProxIntLowThresh(uint8_t threshold);
+bool setProxIntHighThresh(uint8_t threshold);
+bool setLightIntLowThreshold(uint16_t threshold);
+bool setLightIntHighThreshold(uint16_t threshold);
+bool setGestureEnterThresh(uint8_t threshold);
+bool setGestureExitThresh(uint8_t threshold);
+bool setGestureLEDDrive(uint8_t drive);
+bool setGestureWaitTime(uint8_t time);
+bool sensor_init();
+void resetGestureParameters();
+bool setLEDBoost(uint8_t boost);
+bool setGestureMode(uint8_t mode);
+bool setGestureGain(uint8_t gain);
+bool setGestureIntEnable(uint8_t enable);
+uint8_t getMode();
+bool setMode(uint8_t mode, uint8_t enable);
+bool enableGestureSensor(bool interrupts);
+bool isGestureAvailable();
+bool processGestureData();
+bool decodeGesture();
+int readGesture();
+void handleGesture();
+
 
 #endif /* GESTURE_SENSOR_H_ */

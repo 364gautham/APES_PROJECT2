@@ -18,6 +18,7 @@ main.obj: C:/ti/TivaWare_C_Series-2.1.4.178/utils/uartstdio.h
 main.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include/stdarg.h
 main.obj: C:/ti/TivaWare_C_Series-2.1.4.178/driverlib/uart.h
 main.obj: C:/ti/TivaWare_C_Series-2.1.4.178/driverlib/rom.h
+main.obj: ../i2c_comm.h
 
 ../main.c: 
 C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include/stdio.h: 
@@ -37,3 +38,4 @@ C:/ti/TivaWare_C_Series-2.1.4.178/utils/uartstdio.h:
 C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include/stdarg.h: 
 C:/ti/TivaWare_C_Series-2.1.4.178/driverlib/uart.h: 
 C:/ti/TivaWare_C_Series-2.1.4.178/driverlib/rom.h: 
+../i2c_comm.h: 
