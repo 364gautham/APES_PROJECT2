@@ -112,11 +112,13 @@ PDE_DEPS__QUOTED :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 . \
+Source/portable/CCS/ARM_CM4F \
+Source/portable/Common \
+Source/portable/MemMang \
 ccs/Debug \
 driverlib \
 ewarm/Exe \
 gcc \
 rvmdk \
 src \
-utils \
 

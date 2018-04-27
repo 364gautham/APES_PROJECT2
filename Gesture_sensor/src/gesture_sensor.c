@@ -5,13 +5,12 @@
  *      Author: KiranHegde
  */
 
-#include "include/gesture_sensor.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include "include/i2c_comm.h"
 #include "driverlib/sysctl.h"
-#include "utils/uartstdio.h"
-#include "driverlib/uart.h"
+#include "include/uart_comm.h"
+#include "include/gesture_sensor.h"
 
 bool setLEDDrive(uint8_t drive)
 {
@@ -206,6 +205,37 @@ bool setGestureWaitTime(uint8_t time)
     return true;
 }
 
+/**
+ * @brief Gets the time in low power mode between gesture detections
+ *
+ * Value    Wait time
+ *   0          0 ms
+ *   1          2.8 ms
+ *   2          5.6 ms
+ *   3          8.4 ms
+ *   4         14.0 ms
+ *   5         22.4 ms
+ *   6         30.8 ms
+ *   7         39.2 ms
+ *
+ * @return the current wait time between gestures. 0xFF on error.
+ */
+uint8_t getGestureWaitTime()
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !i2c_read(APDS9960_GCONF2, &val) )
+    {
+        return ERROR;
+    }
+
+    /* Mask out GWTIME bits */
+    val &= 0b00000111;
+
+    return val;
+}
+
 bool sensor_init()
 {
     uint8_t id;
@@ -360,6 +390,27 @@ bool setLEDBoost(uint8_t boost)
     return true;
 }
 
+/**
+ * @brief Tells if the gesture state machine is currently running
+ *
+ * @return 1 if gesture state machine is running, 0 if not. 0xFF on error.
+ */
+uint8_t getGestureMode()
+{
+    uint8_t val;
+
+    /* Read value from GCONF4 register */
+    if( !i2c_read(APDS9960_GCONF4, &val) )
+    {
+        return ERROR;
+    }
+
+    /* Mask out GMODE bit */
+    val &= 0b00000001;
+
+    return val;
+}
+
 bool setGestureMode(uint8_t mode)
 {
     uint8_t val;
@@ -405,6 +456,27 @@ bool setGestureGain(uint8_t gain)
     }
 
     return true;
+}
+
+/**
+ * @brief Gets if gesture interrupts are enabled or not
+ *
+ * @return 1 if interrupts are enabled, 0 if not. 0xFF on error.
+ */
+uint8_t getGestureIntEnable()
+{
+    uint8_t val;
+
+    /* Read value from GCONF4 register */
+    if( !i2c_read(APDS9960_GCONF4, &val) )
+    {
+        return ERROR;
+    }
+
+    /* Shift and mask out GIEN bit */
+    val = (val >> 1) & 0b00000001;
+
+    return val;
 }
 
 bool setGestureIntEnable(uint8_t enable)
@@ -484,34 +556,70 @@ bool enableGestureSensor(bool interrupts)
         return false;
     if(!setLEDBoost(LED_BOOST_300))
         return false;
-    if( interrupts ) {
-            if( !setGestureIntEnable(1) ) {
-                return false;
-            }
-        } else {
-            if( !setGestureIntEnable(0) ) {
-                return false;
-            }
+    if( interrupts )
+    {
+        if( !setGestureIntEnable(1) )
+        {
+            return false;
+        }
+    }
+    else
+    {
+        if( !setGestureIntEnable(0) )
+        {
+            return false;
+        }
     }
     if(!setGestureMode(1))
+    {
         return false;
+    }
 
     if(!setGestureGain(GGAIN_2X))
+    {
         return false;
+    }
 
     if( !setMode(POWER, 1) )
     {
         return false;
     }
-    if( !setMode(WAIT, 1) ) {
+    if( !setMode(WAIT, 1) )
+    {
         return false;
     }
-    if( !setMode(PROXIMITY, 1) ) {
+    if( !setMode(PROXIMITY, 1) )
+    {
         return false;
     }
-    if( !setMode(GESTURE, 1) ) {
+    if( !setMode(GESTURE, 1) )
+    {
         return false;
     }
+    return true;
+}
+
+/**
+ * @brief Ends the gesture recognition engine on the APDS-9960
+ *
+ * @return True if engine disabled correctly. False on error.
+ */
+bool disableGestureSensor()
+{
+    resetGestureParameters();
+    if( !setGestureIntEnable(0) )
+    {
+        return false;
+    }
+    if( !setGestureMode(0) )
+    {
+        return false;
+    }
+    if( !setMode(GESTURE, 0) )
+    {
+        return false;
+    }
+
     return true;
 }
 
@@ -529,9 +637,12 @@ bool isGestureAvailable()
     val &= APDS9960_GVALID;
 
     /* Return true/false based on GVALID bit */
-    if( val == 1) {
+    if( val == 1)
+    {
         return true;
-    } else {
+    }
+    else
+    {
         return false;
     }
 }
@@ -554,22 +665,26 @@ bool processGestureData()
     int ud_delta;
     int lr_delta;
     int i;
-    //UARTprintf("%d\n\r", gesture_data_.total_gestures);
+
     /* If we have less than 4 total gestures, that's not enough */
-    if( gesture_data_.total_gestures <= 4 ) {
+    if( gesture_data_.total_gestures <= 4 )
+    {
         return false;
     }
 
     /* Check to make sure our data isn't out of bounds */
     if( (gesture_data_.total_gestures <= 32) && \
-        (gesture_data_.total_gestures > 0) ) {
+        (gesture_data_.total_gestures > 0) )
+    {
 
         /* Find the first value in U/D/L/R above the threshold */
-        for( i = 0; i < gesture_data_.total_gestures; i++ ) {
+        for( i = 0; i < gesture_data_.total_gestures; i++ )
+        {
             if( (gesture_data_.u_data[i] > GESTURE_THRESHOLD_OUT) &&
                 (gesture_data_.d_data[i] > GESTURE_THRESHOLD_OUT) &&
                 (gesture_data_.l_data[i] > GESTURE_THRESHOLD_OUT) &&
-                (gesture_data_.r_data[i] > GESTURE_THRESHOLD_OUT) ) {
+                (gesture_data_.r_data[i] > GESTURE_THRESHOLD_OUT) )
+            {
 
                 u_first = gesture_data_.u_data[i];
                 d_first = gesture_data_.d_data[i];
@@ -581,17 +696,20 @@ bool processGestureData()
 
         /* If one of the _first values is 0, then there is no good data */
         if( (u_first == 0) || (d_first == 0) || \
-            (l_first == 0) || (r_first == 0) ) {
+            (l_first == 0) || (r_first == 0) )
+        {
 
             return false;
         }
         /* Find the last value in U/D/L/R above the threshold */
-        for( i = gesture_data_.total_gestures - 1; i >= 0; i-- ) {
+        for( i = gesture_data_.total_gestures - 1; i >= 0; i-- )
+        {
 
             if( (gesture_data_.u_data[i] > GESTURE_THRESHOLD_OUT) &&
                 (gesture_data_.d_data[i] > GESTURE_THRESHOLD_OUT) &&
                 (gesture_data_.l_data[i] > GESTURE_THRESHOLD_OUT) &&
-                (gesture_data_.r_data[i] > GESTURE_THRESHOLD_OUT) ) {
+                (gesture_data_.r_data[i] > GESTURE_THRESHOLD_OUT) )
+            {
 
                 u_last = gesture_data_.u_data[i];
                 d_last = gesture_data_.d_data[i];
@@ -617,20 +735,30 @@ bool processGestureData()
     gesture_lr_delta_ += lr_delta;
 
     /* Determine U/D gesture */
-    if( gesture_ud_delta_ >= GESTURE_SENSITIVITY_1 ) {
+    if( gesture_ud_delta_ >= GESTURE_SENSITIVITY_1 )
+    {
         gesture_ud_count_ = 1;
-    } else if( gesture_ud_delta_ <= -GESTURE_SENSITIVITY_1 ) {
+    }
+    else if( gesture_ud_delta_ <= -GESTURE_SENSITIVITY_1 )
+    {
         gesture_ud_count_ = -1;
-    } else {
+    }
+    else
+    {
         gesture_ud_count_ = 0;
     }
 
     /* Determine L/R gesture */
-    if( gesture_lr_delta_ >= GESTURE_SENSITIVITY_1 ) {
+    if( gesture_lr_delta_ >= GESTURE_SENSITIVITY_1 )
+    {
         gesture_lr_count_ = 1;
-    } else if( gesture_lr_delta_ <= -GESTURE_SENSITIVITY_1 ) {
+    }
+    else if( gesture_lr_delta_ <= -GESTURE_SENSITIVITY_1 )
+    {
         gesture_lr_count_ = -1;
-    } else {
+    }
+    else
+    {
         gesture_lr_count_ = 0;
     }
 
@@ -691,52 +819,168 @@ bool processGestureData()
 bool decodeGesture()
 {
     /* Return if near or far event is detected */
-    if( gesture_state_ == NEAR_STATE ) {
+    if( gesture_state_ == NEAR_STATE )
+    {
         gesture_motion_ = DIR_NEAR;
         return true;
-    } else if ( gesture_state_ == FAR_STATE ) {
+    }
+    else if ( gesture_state_ == FAR_STATE )
+    {
         gesture_motion_ = DIR_FAR;
         return true;
     }
 
     /* Determine swipe direction */
-    if( (gesture_ud_count_ == -1) && (gesture_lr_count_ == 0) ) {
+    if( (gesture_ud_count_ == -1) && (gesture_lr_count_ == 0) )
+    {
         gesture_motion_ = DIR_UP;
-    } else if( (gesture_ud_count_ == 1) && (gesture_lr_count_ == 0) ) {
+    }
+    else if( (gesture_ud_count_ == 1) && (gesture_lr_count_ == 0) )
+    {
         gesture_motion_ = DIR_DOWN;
-    } else if( (gesture_ud_count_ == 0) && (gesture_lr_count_ == 1) ) {
+    }
+    else if( (gesture_ud_count_ == 0) && (gesture_lr_count_ == 1) )
+    {
         gesture_motion_ = DIR_RIGHT;
-    } else if( (gesture_ud_count_ == 0) && (gesture_lr_count_ == -1) ) {
+    }
+    else if( (gesture_ud_count_ == 0) && (gesture_lr_count_ == -1) )
+    {
         gesture_motion_ = DIR_LEFT;
-    } else if( (gesture_ud_count_ == -1) && (gesture_lr_count_ == 1) ) {
-        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) ) {
+    }
+    else if( (gesture_ud_count_ == -1) && (gesture_lr_count_ == 1) )
+    {
+        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) )
+        {
             gesture_motion_ = DIR_UP;
-        } else {
+        }
+        else
+        {
             gesture_motion_ = DIR_RIGHT;
         }
-    } else if( (gesture_ud_count_ == 1) && (gesture_lr_count_ == -1) ) {
-        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) ) {
+    }
+    else if( (gesture_ud_count_ == 1) && (gesture_lr_count_ == -1) )
+    {
+        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) )
+        {
             gesture_motion_ = DIR_DOWN;
-        } else {
+        }
+        else
+        {
             gesture_motion_ = DIR_LEFT;
         }
-    } else if( (gesture_ud_count_ == -1) && (gesture_lr_count_ == -1) ) {
-        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) ) {
+    }
+    else if( (gesture_ud_count_ == -1) && (gesture_lr_count_ == -1) )
+    {
+        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) )
+        {
             gesture_motion_ = DIR_UP;
-        } else {
+        }
+        else
+        {
             gesture_motion_ = DIR_LEFT;
         }
-    } else if( (gesture_ud_count_ == 1) && (gesture_lr_count_ == 1) ) {
-        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) ) {
+    }
+    else if( (gesture_ud_count_ == 1) && (gesture_lr_count_ == 1) )
+    {
+        if( abs(gesture_ud_delta_) > abs(gesture_lr_delta_) )
+        {
             gesture_motion_ = DIR_DOWN;
-        } else {
+        }
+        else
+        {
             gesture_motion_ = DIR_RIGHT;
         }
-    } else {
+    }
+    else
+    {
         return false;
     }
 
     return true;
+}
+
+/**
+ * Turn the APDS-9960 on
+ *
+ * @return True if operation successful. False otherwise.
+ */
+bool enablePower()
+{
+    if( !setMode(POWER, 1) )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Turn the APDS-9960 off
+ *
+ * @return True if operation successful. False otherwise.
+ */
+bool disablePower()
+{
+    if( !setMode(POWER, 0) )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Gets the gain of the photodiode during gesture mode
+ *
+ * Value    Gain
+ *   0       1x
+ *   1       2x
+ *   2       4x
+ *   3       8x
+ *
+ * @return the current photodiode gain. 0xFF on error.
+ */
+uint8_t getGestureGain()
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !i2c_read(APDS9960_GCONF2, &val) )
+    {
+        return ERROR;
+    }
+
+    /* Shift and mask out GGAIN bits */
+    val = (val >> 5) & 0b00000011;
+
+    return val;
+}
+
+/**
+ * @brief Gets the drive current of the LED during gesture mode
+ *
+ * Value    LED Current
+ *   0        100 mA
+ *   1         50 mA
+ *   2         25 mA
+ *   3         12.5 mA
+ *
+ * @return the LED drive current value. 0xFF on error.
+ */
+uint8_t getGestureLEDDrive()
+{
+    uint8_t val;
+
+    /* Read value from GCONF2 register */
+    if( !i2c_read(APDS9960_GCONF2, &val) )
+    {
+        return ERROR;
+    }
+
+    /* Shift and mask out GLDRIVE bits */
+    val = (val >> 3) & 0b00000011;
+
+    return val;
 }
 
 int readGesture()
@@ -749,7 +993,8 @@ int readGesture()
     int i;
 
         // Make sure that power and gesture is on and data is valid
-        if( !isGestureAvailable() || !(getMode() & 0b01000001) ) {
+        if( !isGestureAvailable() || !(getMode() & 0b01000001) )
+        {
             return DIR_NONE;
     }
 
@@ -803,7 +1048,7 @@ int readGesture()
                      {
                          if( decodeGesture() )
                          {
-                             //***TODO: U-Turn Gestures
+                             // TODO U-Turn Gestures
                          }
                      }
                      // Reset data
@@ -831,25 +1076,25 @@ void handleGesture()
         switch ( readGesture() )
         {
             case DIR_UP:
-                UARTprintf("UP\n\r");
+                UART_TerminalSend("UP\n\r");
                 break;
             case DIR_DOWN:
-                UARTprintf("DOWN\n\r");
+                UART_TerminalSend("DOWN\n\r");
                 break;
             case DIR_LEFT:
-                UARTprintf("LEFT\n\r");
+                UART_TerminalSend("LEFT\n\r");
                 break;
             case DIR_RIGHT:
-                UARTprintf("RIGHT\n\r");
+                UART_TerminalSend("RIGHT\n\r");
                 break;
             case DIR_NEAR:
-                UARTprintf("NEAR\n\r");
+                UART_TerminalSend("NEAR\n\r");
                 break;
             case DIR_FAR:
-                UARTprintf("FAR\n\r");
+                UART_TerminalSend("FAR\n\r");
                 break;
             default:
-                UARTprintf("No Gesture\n\r");
+                UART_TerminalSend("No Gesture\n\r");
         }
     }
 }

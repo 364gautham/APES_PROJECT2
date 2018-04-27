@@ -14,4 +14,5 @@
 	<templateProperties value="id=com.ti.common.project.core.emptyProjectWithMainTemplate,"/>
 	<filesToOpen value="main.c,"/>
 	<isTargetManual value="false"/>
+	<origin value="C:/Users/kiran/workspace_v7/APES_Project2/Gesture_sensor"/>
 </projectOptions>

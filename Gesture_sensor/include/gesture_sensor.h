@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define UART_CLOCK (16000000U)
+
 #define GESTURE_EN (0x1<<6)
 #define PROX_INT_EN (0x1<<5)
 #define ALS_INT_EN (0x1<<4)

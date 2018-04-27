@@ -34,6 +34,7 @@ static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
 extern void PortAIntHandler(void);
+extern void UARTIntHandler(void);
 //*****************************************************************************
 //
 // External declaration for the reset handler that is to be called when the
@@ -83,7 +84,7 @@ void (* const g_pfnVectors[])(void) =
     0,                                      // Reserved
     IntDefaultHandler,                      // The PendSV handler
     IntDefaultHandler,                      // The SysTick handler
-    PortAIntHandler,                      // GPIO Port A
+    PortAIntHandler,                        // GPIO Port A
     IntDefaultHandler,                      // GPIO Port B
     IntDefaultHandler,                      // GPIO Port C
     IntDefaultHandler,                      // GPIO Port D
@@ -143,7 +144,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // UART4 Rx and Tx
     IntDefaultHandler,                      // UART5 Rx and Tx
     IntDefaultHandler,                      // UART6 Rx and Tx
-    IntDefaultHandler,                      // UART7 Rx and Tx
+    UARTIntHandler,                         // UART7 Rx and Tx
     IntDefaultHandler,                      // I2C2 Master and Slave
     IntDefaultHandler,                      // I2C3 Master and Slave
     IntDefaultHandler,                      // Timer 4 subtimer A

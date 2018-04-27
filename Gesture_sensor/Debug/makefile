@@ -12,6 +12,10 @@ GEN_CMDS__FLAG :=
 ORDERED_OBJS += \
 "./epi_workaround_ccs.obj" \
 "./tm4c1294ncpdt_startup_ccs.obj" \
+"./Source/portable/CCS/ARM_CM4F/port.obj" \
+"./Source/portable/CCS/ARM_CM4F/portasm.obj" \
+"./Source/portable/Common/mpu_wrappers.obj" \
+"./Source/portable/MemMang/heap_4.obj" \
 "./driverlib/adc.obj" \
 "./driverlib/aes.obj" \
 "./driverlib/can.obj" \
@@ -47,8 +51,7 @@ ORDERED_OBJS += \
 "./src/gesture_sensor.obj" \
 "./src/i2c_comm.obj" \
 "./src/main.obj" \
-"./utils/uartstdio.obj" \
-"./utils/ustdlib.obj" \
+"./src/uart_comm.obj" \
 "../tm4c1294ncpdt.cmd" \
 "../ccs/Debug/driverlib.lib" \
 "../rvmdk/driverlib.lib" \
@@ -63,21 +66,25 @@ RMDIR := RMDIR /S/Q
 # All of the sources participating in the build are defined here
 -include sources.mk
 -include subdir_vars.mk
+-include Source/portable/CCS/ARM_CM4F/subdir_vars.mk
+-include Source/portable/Common/subdir_vars.mk
+-include Source/portable/MemMang/subdir_vars.mk
 -include ccs/Debug/subdir_vars.mk
 -include driverlib/subdir_vars.mk
 -include ewarm/Exe/subdir_vars.mk
 -include gcc/subdir_vars.mk
 -include rvmdk/subdir_vars.mk
 -include src/subdir_vars.mk
--include utils/subdir_vars.mk
 -include subdir_rules.mk
+-include Source/portable/CCS/ARM_CM4F/subdir_rules.mk
+-include Source/portable/Common/subdir_rules.mk
+-include Source/portable/MemMang/subdir_rules.mk
 -include ccs/Debug/subdir_rules.mk
 -include driverlib/subdir_rules.mk
 -include ewarm/Exe/subdir_rules.mk
 -include gcc/subdir_rules.mk
 -include rvmdk/subdir_rules.mk
 -include src/subdir_rules.mk
--include utils/subdir_rules.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)
@@ -207,9 +214,10 @@ Gesture_sensor.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "epi_workaround_ccs.obj" "tm4c1294ncpdt_startup_ccs.obj" "driverlib\adc.obj" "driverlib\aes.obj" "driverlib\can.obj" "driverlib\comp.obj" "driverlib\cpu.obj" "driverlib\crc.obj" "driverlib\des.obj" "driverlib\eeprom.obj" "driverlib\emac.obj" "driverlib\epi.obj" "driverlib\flash.obj" "driverlib\fpu.obj" "driverlib\gpio.obj" "driverlib\hibernate.obj" "driverlib\i2c.obj" "driverlib\interrupt.obj" "driverlib\lcd.obj" "driverlib\mpu.obj" "driverlib\onewire.obj" "driverlib\pwm.obj" "driverlib\qei.obj" "driverlib\shamd5.obj" "driverlib\ssi.obj" "driverlib\sw_crc.obj" "driverlib\sysctl.obj" "driverlib\sysexc.obj" "driverlib\systick.obj" "driverlib\timer.obj" "driverlib\uart.obj" "driverlib\udma.obj" "driverlib\usb.obj" "driverlib\watchdog.obj" "src\gesture_sensor.obj" "src\i2c_comm.obj" "src\main.obj" "utils\uartstdio.obj" "utils\ustdlib.obj" 
-	-$(RM) "tm4c1294ncpdt_startup_ccs.d" "driverlib\adc.d" "driverlib\aes.d" "driverlib\can.d" "driverlib\comp.d" "driverlib\cpu.d" "driverlib\crc.d" "driverlib\des.d" "driverlib\eeprom.d" "driverlib\emac.d" "driverlib\epi.d" "driverlib\flash.d" "driverlib\fpu.d" "driverlib\gpio.d" "driverlib\hibernate.d" "driverlib\i2c.d" "driverlib\interrupt.d" "driverlib\lcd.d" "driverlib\mpu.d" "driverlib\onewire.d" "driverlib\pwm.d" "driverlib\qei.d" "driverlib\shamd5.d" "driverlib\ssi.d" "driverlib\sw_crc.d" "driverlib\sysctl.d" "driverlib\sysexc.d" "driverlib\systick.d" "driverlib\timer.d" "driverlib\uart.d" "driverlib\udma.d" "driverlib\usb.d" "driverlib\watchdog.d" "src\gesture_sensor.d" "src\i2c_comm.d" "src\main.d" "utils\uartstdio.d" "utils\ustdlib.d" 
+	-$(RM) "epi_workaround_ccs.obj" "tm4c1294ncpdt_startup_ccs.obj" "Source\portable\CCS\ARM_CM4F\port.obj" "Source\portable\CCS\ARM_CM4F\portasm.obj" "Source\portable\Common\mpu_wrappers.obj" "Source\portable\MemMang\heap_4.obj" "driverlib\adc.obj" "driverlib\aes.obj" "driverlib\can.obj" "driverlib\comp.obj" "driverlib\cpu.obj" "driverlib\crc.obj" "driverlib\des.obj" "driverlib\eeprom.obj" "driverlib\emac.obj" "driverlib\epi.obj" "driverlib\flash.obj" "driverlib\fpu.obj" "driverlib\gpio.obj" "driverlib\hibernate.obj" "driverlib\i2c.obj" "driverlib\interrupt.obj" "driverlib\lcd.obj" "driverlib\mpu.obj" "driverlib\onewire.obj" "driverlib\pwm.obj" "driverlib\qei.obj" "driverlib\shamd5.obj" "driverlib\ssi.obj" "driverlib\sw_crc.obj" "driverlib\sysctl.obj" "driverlib\sysexc.obj" "driverlib\systick.obj" "driverlib\timer.obj" "driverlib\uart.obj" "driverlib\udma.obj" "driverlib\usb.obj" "driverlib\watchdog.obj" "src\gesture_sensor.obj" "src\i2c_comm.obj" "src\main.obj" "src\uart_comm.obj" 
+	-$(RM) "tm4c1294ncpdt_startup_ccs.d" "Source\portable\CCS\ARM_CM4F\port.d" "Source\portable\Common\mpu_wrappers.d" "Source\portable\MemMang\heap_4.d" "driverlib\adc.d" "driverlib\aes.d" "driverlib\can.d" "driverlib\comp.d" "driverlib\cpu.d" "driverlib\crc.d" "driverlib\des.d" "driverlib\eeprom.d" "driverlib\emac.d" "driverlib\epi.d" "driverlib\flash.d" "driverlib\fpu.d" "driverlib\gpio.d" "driverlib\hibernate.d" "driverlib\i2c.d" "driverlib\interrupt.d" "driverlib\lcd.d" "driverlib\mpu.d" "driverlib\onewire.d" "driverlib\pwm.d" "driverlib\qei.d" "driverlib\shamd5.d" "driverlib\ssi.d" "driverlib\sw_crc.d" "driverlib\sysctl.d" "driverlib\sysexc.d" "driverlib\systick.d" "driverlib\timer.d" "driverlib\uart.d" "driverlib\udma.d" "driverlib\usb.d" "driverlib\watchdog.d" "src\gesture_sensor.d" "src\i2c_comm.d" "src\main.d" "src\uart_comm.d" 
 	-$(RM) "epi_workaround_ccs.d" 
+	-$(RM) "Source\portable\CCS\ARM_CM4F\portasm.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
