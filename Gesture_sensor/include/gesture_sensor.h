@@ -248,6 +248,7 @@ bool processGestureData();
 bool decodeGesture();
 int readGesture();
 void handleGesture();
+bool disableGestureSensor();
 
 
 #endif /* GESTURE_SENSOR_H_ */

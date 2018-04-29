@@ -27,8 +27,6 @@ void
 UARTIntHandler(void)
 {
     uint32_t ui32Status;
-    char temp[30];
-    uint8_t i=0;
     //
     // Get the interrrupt status.
     //
@@ -43,20 +41,7 @@ UARTIntHandler(void)
     // Loop while there are characters in the receive FIFO.
     //
     //if((ui32Status & UART_INT_RX)==UART_INT_RX)
-    {
-        while(UARTCharsAvail(UART6_BASE))
-        {
-            //
-            // Read the next character from the UART and write it back to the UART.
-            //
-            temp[i++] = (char)UARTCharGet(UART6_BASE);
-
-        }
-        char printMsg[30];
-        memset(printMsg, '\0', sizeof(printMsg));
-        sprintf(printMsg, "%s\n\r", temp);
-        UART_TerminalSend(printMsg);
-    }
+    xSemaphoreGive(bbgSocketSem);
 }
 
 bool ConfigureUART_terminal(void)
@@ -131,6 +116,7 @@ bool UART_BBGSend(char *ptr, uint8_t len)
 {
     if(!ptr)    return false;
     uint8_t status;
+    while(UARTBusy(UART6_BASE));
     if(!uin8bbgSend)
     {
         Logger_t temp = *(Logger_t *)ptr;
@@ -146,9 +132,9 @@ bool UART_BBGSend(char *ptr, uint8_t len)
         UART_TerminalSend("\t");
         UART_TerminalSend(temp.msg);
         UART_TerminalSend("\t");
-        if(temp.log_data)
+        if(temp.value)
         {
-            ltoa(temp.log_data, i32send);
+            ltoa(temp.value, i32send);
             UART_TerminalSend(i32send);
         }
         UART_TerminalSend("\n\r");
@@ -165,12 +151,12 @@ bool UART_BBGSend(char *ptr, uint8_t len)
     return status;
 }
 
-bool UART_BBGReceive(char *ptr, uint8_t len)
+bool UART_BBGReceive(char *ptr)
 {
     if(!ptr)    return false;
-    while(len--)
+    //while(UARTCharsAvail(UART6_BASE))
     {
-        *ptr++ = UARTCharGet(UART7_BASE);
+        *ptr = UARTCharGetNonBlocking(UART6_BASE);
     }
     return true;
 }

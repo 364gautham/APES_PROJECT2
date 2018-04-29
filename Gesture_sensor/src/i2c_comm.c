@@ -4,7 +4,6 @@
  *  Created on: Apr 24, 2018
  *      Author: KiranHegde
  */
-
 #include <stdint.h>
 #include <stdbool.h>
 #include "inc/hw_memmap.h"
@@ -13,9 +12,12 @@
 #include "driverlib/pin_map.h"
 #include "driverlib/sysctl.h"
 #include "include/i2c_comm.h"
+#include "FreeRTOS.h"
+#include "semphr.h"
 
 bool i2c_read(uint8_t reg, uint8_t *temp)
 {
+        //xSemaphoreTake(i2cSem, portMAX_DELAY);
         I2CMasterSlaveAddrSet(I2C_BASE, SLAVE_ADDRESS, false);
         //
         // Place the character to be sent in the data register
@@ -39,11 +41,13 @@ bool i2c_read(uint8_t reg, uint8_t *temp)
         while(I2CMasterBusy(I2C_BASE));
         *temp = (uint8_t)I2CMasterDataGet(I2C_BASE);
         while(I2CMasterBusy(I2C_BASE));
+        //xSemaphoreGive(i2cSem);
         return true;
 }
 
 bool i2c_readID()
 {
+        //xSemaphoreTake(i2cSem, portMAX_DELAY);
         I2CMasterSlaveAddrSet(I2C_BASE, SLAVE_ADDRESS, false);
         //
         // Place the character to be sent in the data register
@@ -60,6 +64,7 @@ bool i2c_readID()
         SysCtlDelay(1000000);
         if(I2CMasterBusy(I2C_BASE))
         {
+            //SemaphoreGive(i2cSem);
             return false;
         }
         I2CMasterSlaveAddrSet(I2C_BASE, SLAVE_ADDRESS, true);
@@ -72,9 +77,11 @@ bool i2c_readID()
         SysCtlDelay(1000000);
         if(I2CMasterBusy(I2C_BASE))
         {
+            //SemaphoreGive(i2cSem);
             return false;
         }
         uint8_t temp = (uint8_t)I2CMasterDataGet(I2C_BASE);
+        //SemaphoreGive(i2cSem);
         //while(I2CMasterBusBusy(I2C_BASE));
         if(temp!=0xAB)  return false;
         return true;
@@ -82,6 +89,7 @@ bool i2c_readID()
 
 bool i2c_write(uint8_t reg, uint8_t val)
 {
+        //SemaphoreTake(i2cSem, portMAX_DELAY);
         I2CMasterSlaveAddrSet(I2C_BASE, SLAVE_ADDRESS, false);
         //
         // Place the character to be sent in the data register
@@ -107,6 +115,7 @@ bool i2c_write(uint8_t reg, uint8_t val)
         // Delay until transmission completes
         //
         while(I2CMasterBusy(I2C_BASE));
+        //xSemaphoreGive(i2cSem);
         return true;
 }
 
@@ -139,6 +148,7 @@ void i2c_setup()
 int ReadDataBlock(uint8_t reg, uint8_t *val, unsigned int len)
 {
     unsigned char i = 0, j=0;
+    //xSemaphoreTake(i2cSem, portMAX_DELAY);
     while(i<len)
     {
         for(j=0; j<4; j++)
@@ -171,5 +181,6 @@ int ReadDataBlock(uint8_t reg, uint8_t *val, unsigned int len)
         }
         j=0;
     }
+    //SemaphoreGive(i2cSem);
     return i;
 }

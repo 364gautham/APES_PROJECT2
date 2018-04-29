@@ -15,11 +15,11 @@
 
 extern uint8_t uin8bbgSend;
 extern uint32_t g_ui32SysClock;
-extern SemaphoreHandle_t TermSem;
+extern SemaphoreHandle_t TermSem, bbgSocketSem;
 bool ConfigureUART_terminal(void);
 bool ConfigureUART_BBG(void);
 bool UART_BBGSend(char *ptr, uint8_t len);
-bool UART_BBGReceive(char *ptr, uint8_t len);
+bool UART_BBGReceive(char *ptr);
 bool UART_TerminalSend(char *ptr);
 
 #endif /* INCLUDE_UART_COMM_H_ */
