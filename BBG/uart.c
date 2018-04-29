@@ -3,31 +3,40 @@
 #include <unistd.h>
 #include <termios.h>
 #include <string.h>
+#include <sys/types.h>
 #include "uart.h"
+#include <sys/stat.h>
+#include <fcntl.h>
+#include "log.h"
 
-
-/* file descriptor for UART*/
-int file;
 
 void uart_init()
 {
       
       /* UART device driver file open for UART protocol*/
 
-      if((file = open("/dev/ttyO4", O_RDWR | O_NOCTTY | O_NDELAY))<0){
+    if((file = open("/dev/ttyO4", O_RDWR | O_NOCTTY | O_SYNC))<0){
         perror("UART: Failed to open the file.\n");
         return -1;
-      }
-
+    }
     /* structure configuration */
-   struct termios options;
-   tcgetattr(file, &options);
-   options.c_cflag = B9600 | CS8 | CREAD | CLOCAL;
-   options.c_iflag = IGNPAR | ICRNL;
-   tcflush(file, TCIFLUSH);
-   tcsetattr(file, TCSANOW, &options);
+   struct termios option;
+
+   tcgetattr(file,&option);
+   option.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON | IGNPAR);
+   option.c_oflag = 0;
+   option.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG);
+   option.c_cc[VMIN] = 1;
+   option.c_cc[VTIME] = 0;
+
+if(cfsetispeed(&option, B115200) || cfsetospeed(&option, B115200))
+ 	perror("ERROR in baud set\n");
+
+if(tcsetattr(file, TCSAFLUSH,& option) < 0)
+	perror("ERROR in set attr\n");
 
 }
+
 
 
 void read_byte(int file,char *receive)
@@ -39,7 +48,7 @@ void read_byte(int file,char *receive)
       return -1;
   } 
 
-  printf("received byte %c\n".*receive);
+  //printf("Val : %d\n",count);
 
 }
 
@@ -47,17 +56,33 @@ void read_string(int file,char *string)
 {
   int i=0;
   do{
-        read_byte(file,&string[i])
+        read_byte(file,&string[i]);
         //i++;
-    }while(string[i++]=='\0');
+    }while(string[i++]!='\0');
 }
-/*
-void read_struct()
+
+void read_struct(int file,Logger_t* data)
 {
+	int count =0;
+	printf("hi33");
+	char recv[sizeof(Logger_t)];
+	
+	read_byte(file,&(data->log_level));
+    	//read_string(descriptor, (char*)&(recvd_struct->eeprom_data));
+       // printf("Sensor data %d\n",(recvd_struct->sensor_data));
+
+printf("hi");
+
+  //:printf("time %ld\n", data->timestamp); 
+  printf("log level %d",data->log_level);
+   /*printf("log level %d",data->log_source);
+  printf("log level %d",data->message);
+  printf("log level %d",data->value);
+*/
+
 
 }
 
-*/
 
 
 void send_byte(int file,char *send)
@@ -70,6 +95,8 @@ void send_byte(int file,char *send)
    }
 
 }
+
+
 
 /*
 int main(){
