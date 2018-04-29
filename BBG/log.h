@@ -9,7 +9,6 @@
 #include <semaphore.h>
 #include <mqueue.h>
 
-#define PORT 5000
 
 mqd_t log_q;
 extern pthread_mutex_t log_lock;
@@ -21,11 +20,12 @@ extern pthread_mutex_t log_lock;
 #define HB_QUEUE_SOCKET "/heartbeat2"
 #define HB_QUEUE_LOG "/heartbeat3"
 
-#define MSG_SIZE                (30)
+#define MSG_SIZE                (40)
 
 #define LOG_LEVEL_INIT          (0x5)
+#define LOG_LEVEL_INFO 		0X6
 #define LOG_LEVEL_ERROR         (0x7)
-#define LOG_LEVEL_HEARTBEAT     (0x10)
+#define LOG_LEVEL_HEARTBEAT     (0x11)
 
 #define LOG_SOURCE_MAIN    (0xa)
 #define LOG_SOURCE_COMM     (0xb)
@@ -47,6 +47,7 @@ typedef struct log
 	uint32_t log_source;
 	char message[MSG_SIZE];
 	uint32_t value;
+//	uint32_t checksum;
 }Logger_t;
 
 void LOG(uint32_t loglevel, uint32_t log_source, char *msg, uint32_t value,uint32_t timestamp);
