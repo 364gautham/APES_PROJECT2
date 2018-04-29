@@ -42,6 +42,44 @@ bool i2c_read(uint8_t reg, uint8_t *temp)
         return true;
 }
 
+bool i2c_readID()
+{
+        I2CMasterSlaveAddrSet(I2C_BASE, SLAVE_ADDRESS, false);
+        //
+        // Place the character to be sent in the data register
+        //
+        I2CMasterDataPut(I2C_BASE, 0x92);
+        //
+        // Initiate send of character from Master to Slave
+        //
+        I2CMasterControl(I2C_BASE, I2C_MASTER_CMD_SINGLE_SEND);
+        //
+        // Delay until transmission completes
+        //
+        //while(I2CMasterBusBusy(I2C_BASE));
+        SysCtlDelay(1000000);
+        if(I2CMasterBusy(I2C_BASE))
+        {
+            return false;
+        }
+        I2CMasterSlaveAddrSet(I2C_BASE, SLAVE_ADDRESS, true);
+
+        I2CMasterControl(I2C_BASE, I2C_MASTER_CMD_SINGLE_RECEIVE);
+        //
+        // Delay until transmission completes
+        //
+        //while(I2CMasterBusBusy(I2C_BASE));
+        SysCtlDelay(1000000);
+        if(I2CMasterBusy(I2C_BASE))
+        {
+            return false;
+        }
+        uint8_t temp = (uint8_t)I2CMasterDataGet(I2C_BASE);
+        //while(I2CMasterBusBusy(I2C_BASE));
+        if(temp!=0xAB)  return false;
+        return true;
+}
+
 bool i2c_write(uint8_t reg, uint8_t val)
 {
         I2CMasterSlaveAddrSet(I2C_BASE, SLAVE_ADDRESS, false);
@@ -92,7 +130,6 @@ void i2c_setup()
         SysCtlPeripheralReset(SYSCTL_PERIPH_I2C0);
         SysCtlPeripheralEnable(SYSCTL_PERIPH_I2C0);
         while(!SysCtlPeripheralReady(SYSCTL_PERIPH_I2C0));
-
 
         /* Enable and initialize I2C0 Master module
          * data transfer rate 400kbps */

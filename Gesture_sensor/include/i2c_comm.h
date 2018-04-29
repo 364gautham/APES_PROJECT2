@@ -16,6 +16,7 @@
 
 extern uint32_t g_ui32SysClock;
 
+bool i2c_readID();
 bool i2c_read(uint8_t reg, uint8_t *temp);
 bool i2c_write(uint8_t reg, uint8_t val);
 void i2c_setup();

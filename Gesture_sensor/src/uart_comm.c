@@ -5,6 +5,8 @@
  *      Author: KiranHegde
  */
 
+#include "FreeRTOS.h"
+#include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -16,12 +18,17 @@
 #include "driverlib/uart.h"
 #include "driverlib/interrupt.h"
 #include "include/uart_comm.h"
+#include "include/logger.h"
+#include <string.h>
+#include "semphr.h"
+#include <stdlib.h>
 
 void
 UARTIntHandler(void)
 {
     uint32_t ui32Status;
-
+    char temp[30];
+    uint8_t i=0;
     //
     // Get the interrrupt status.
     //
@@ -42,9 +49,13 @@ UARTIntHandler(void)
             //
             // Read the next character from the UART and write it back to the UART.
             //
-            UARTCharPutNonBlocking(UART0_BASE,
-                                    UARTCharGetNonBlocking(UART6_BASE));
+            temp[i++] = (char)UARTCharGet(UART6_BASE);
+
         }
+        char printMsg[30];
+        memset(printMsg, '\0', sizeof(printMsg));
+        sprintf(printMsg, "%s\n\r", temp);
+        UART_TerminalSend(printMsg);
     }
 }
 
@@ -111,7 +122,7 @@ bool ConfigureUART_BBG(void)
                                  UART_CONFIG_PAR_NONE));
 
     IntEnable(INT_UART6);
-    UARTIntEnable(UART6_BASE, UART_INT_RX | UART_INT_RT);
+    UARTIntEnable(UART6_BASE, UART_INT_RX);
 
     return true;
 }
@@ -119,11 +130,39 @@ bool ConfigureUART_BBG(void)
 bool UART_BBGSend(char *ptr, uint8_t len)
 {
     if(!ptr)    return false;
-    while(len--)
+    uint8_t status;
+    if(!uin8bbgSend)
     {
-        UARTCharPut(UART6_BASE, *ptr++);
+        Logger_t temp = *(Logger_t *)ptr;
+        char i32send[2];
+        ltoa(temp.timestamp, i32send);
+        UART_TerminalSend(i32send);
+        UART_TerminalSend("\t");
+        ltoa(temp.log_source, i32send);
+        UART_TerminalSend(i32send);
+        UART_TerminalSend("\t");
+        ltoa(temp.log_level, i32send);
+        UART_TerminalSend(i32send);
+        UART_TerminalSend("\t");
+        UART_TerminalSend(temp.msg);
+        UART_TerminalSend("\t");
+        if(temp.log_data)
+        {
+            ltoa(temp.log_data, i32send);
+            UART_TerminalSend(i32send);
+        }
+        UART_TerminalSend("\n\r");
+        status = true;
     }
-    return true;
+    else
+    {
+        while(len--)
+        {
+            UARTCharPut(UART6_BASE, *ptr++);
+        }
+        status = true;
+    }
+    return status;
 }
 
 bool UART_BBGReceive(char *ptr, uint8_t len)
@@ -139,10 +178,12 @@ bool UART_BBGReceive(char *ptr, uint8_t len)
 bool UART_TerminalSend(char *ptr)
 {
     if(!ptr)    return false;
+    xSemaphoreTake(TermSem, portMAX_DELAY);
     uint32_t size = strlen(ptr);
     while(size--)
     {
         UARTCharPut(UART0_BASE, *ptr++);
     }
+    xSemaphoreGive(TermSem);
     return true;
 }

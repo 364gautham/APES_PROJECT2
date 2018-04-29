@@ -1069,20 +1069,20 @@ int readGesture()
     }
 }
 
-void handleGesture()
+/*void handleGesture()
 {
     if ( isGestureAvailable() )
     {
         switch ( readGesture() )
         {
             case DIR_UP:
-                UART_TerminalSend("UP\n\r");
+                gesture = DIR_UP;
                 break;
             case DIR_DOWN:
-                UART_TerminalSend("DOWN\n\r");
+                gesture = DIR_DOWN;
                 break;
             case DIR_LEFT:
-                UART_TerminalSend("LEFT\n\r");
+                gesture = DIR_UP;
                 break;
             case DIR_RIGHT:
                 UART_TerminalSend("RIGHT\n\r");
@@ -1097,4 +1097,4 @@ void handleGesture()
                 UART_TerminalSend("No Gesture\n\r");
         }
     }
-}
+}*/

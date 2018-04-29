@@ -112,6 +112,7 @@ PDE_DEPS__QUOTED :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 . \
+Source \
 Source/portable/CCS/ARM_CM4F \
 Source/portable/Common \
 Source/portable/MemMang \
