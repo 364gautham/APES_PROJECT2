@@ -1,0 +1,115 @@
+Timestamp	LOG_LEVEL	LOG_SOURCE	Value	Message
+0		5		10		0	BBG_Main_Task Initialised
+0		5		14		0	BBG_Server_Task Initialised
+0		5		14		0	BBG_Server_Task Initialised
+0		5		11		0	BBG_COMMUNICAION_Task Initiali
+0		5		12		0	BBG_Logger_Task Initialised
+0		0		0		0	
+5884		5		3		0	Hello!! Gesture Application
+5884		5		1		0	Gesture Task Created
+5884		5		1		0	Sensor Initialized
+5884		5		1		0	Sensor Enabled
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication
+0		7		11		0	No heartbeat for Communication

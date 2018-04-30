@@ -14,6 +14,7 @@
 #include <netinet/in.h>
 #include <time.h>
 #include "socket.h"
+#include "usrled.h"
 
 
 FILE *fp_log;
@@ -165,19 +166,26 @@ int  main(int argc, char *argv[]){
 	while(!kill_process)
 	{	
 		if(hb_comm == 0){
-			if(hbcomm_count++ >20)
-				LOG(LOG_LEVEL_HEARTBEAT,LOG_SOURCE_MAIN ,"NO HEARTBEAT FROM COMMUNICATION TASK " ,NULL,NULL);
+			if(hbcomm_count++ >20){
+					LOG(LOG_LEVEL_HEARTBEAT,LOG_SOURCE_MAIN ,"NO HEARTBEAT FROM COMMUNICATION TASK " ,NULL,NULL);
+					//identification_led();
+				}
 			}
+
 		else
 		{
 			LOG(LOG_LEVEL_HEARTBEAT,LOG_SOURCE_MAIN,"ALIVE FROM COMMUNICATION TASK",NULL,NULL);
 			hb_comm =0;
 			hbcomm_count = 0;
 		}	
+		/*
 
 		if(hb_socket == 0){
-			if(hbsock_count++ >20)
-				LOG(LOG_LEVEL_HEARTBEAT,LOG_SOURCE_MAIN ,"NO HEARTBEAT FROM SOCKET TASK " ,NULL,NULL);
+			if(hbsock_count++ >60){
+
+					LOG(LOG_LEVEL_HEARTBEAT,LOG_SOURCE_MAIN ,"NO HEARTBEAT FROM SOCKET TASK " ,NULL,NULL);
+					identification_led();
+				}
 			}
 		else
 		{
@@ -185,6 +193,7 @@ int  main(int argc, char *argv[]){
 			hb_socket=0;
 			hbsock_count = 0;
 		}
+		*/
 
 		if(hb_logger == 0){
 			if(hblog_count++ >20)
@@ -209,7 +218,7 @@ int  main(int argc, char *argv[]){
 }
 
 static void* communication(void *arg){
-	//struct thread_info *tinfo = (struct thread_info*)arg;	
+	
 	int count=0;
 	comm_thread_end = 0;
 	uint8_t val_hb = 1;
@@ -270,70 +279,12 @@ static void* communication(void *arg){
 	            printf("cant send message to process1 and returned %d\n", errno);
 	        } 
 
-			/*
-			if(log.log_level == 17){
-				tiva_hb = 1;
-				count = write(file,&tiva_hb,sizeof(tiva_hb));
-				printf("Write to TIVA%d\n",count);	
-			}
-			*/
 
-	        
-		
-
-	        
-
-	        /* receive socket client request */
-		
-			/*
-			sleep(1);
-			if((mq_receive(socket_q, &info, sizeof(info), 0))==-1)
-			{
-				printf("No Client call Connection\n");
-			}
-			
-
-			else
-			{
-				printf("val to tiva..\n");
-				if (info >0){
-					val = (uint8_t)info;
-					printf("Value info %d\n",info);
-					printf("val sent to tiva %d\n",info);
-					switch(info)
-					{
-
-						case 1 : val = 0x01;
-						 	break;
-						case 2 : val = 0x02;
-							break;
-						case 3: val = 0x03;
-					       		break;
-						case 4 : val = 0x04;
-					 		break;
-						case 5 : val = 0x05;
-							break;
-						case 6 : val = 0x06;
-							break;
-						case 7 : val = 0x07;
-							break;
-						case 8 :val = 0x08;
-				       			break;
-						default: ;
-				 	}
-
-					count = 0;
-					count  = write(file,&val,sizeof(val));
-					printf("Bytes to tiva : %d\n",count);
-					info =0;
-				}
-			}
-			*/
-
-			
 
 			client_call = log.log_source;
 			if(client_call == 18){
+
+				printf("Vallll %d",log.value);
 				reply = log.value;
 				printf("reply : %d\n",reply);
 				printf("valueee\n\n\n");
@@ -344,7 +295,9 @@ static void* communication(void *arg){
 				}
 			}
 			
-
+			
+			if(log.log_level == LOG_LEVEL_ERROR)
+				identification_led();
 		
 		}
 		//sleep(1);

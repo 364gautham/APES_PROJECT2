@@ -29,7 +29,7 @@ void uart_init()
    option.c_cc[VMIN] = 1;
    option.c_cc[VTIME] = 0;
 
-if(cfsetispeed(&option, B115200) || cfsetospeed(&option, B115200))
+if(cfsetispeed(&option, B57600) || cfsetospeed(&option, B57600))
  	perror("ERROR in baud set\n");
 
 if(tcsetattr(file, TCSAFLUSH,& option) < 0)

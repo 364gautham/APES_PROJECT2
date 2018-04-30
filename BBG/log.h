@@ -20,7 +20,7 @@ extern pthread_mutex_t log_lock;
 #define HB_QUEUE_SOCKET "/heartbeat2"
 #define HB_QUEUE_LOG "/heartbeat3"
 
-#define MSG_SIZE                (40)
+#define MSG_SIZE                (30)
 
 #define LOG_LEVEL_INIT          (0x5)
 #define LOG_LEVEL_INFO 		0X6
@@ -42,11 +42,11 @@ extern pthread_mutex_t log_lock;
 
 typedef struct log
 {
+	uint32_t value;
 	uint32_t timestamp;
 	uint32_t log_level;
 	uint32_t log_source;
 	char message[MSG_SIZE];
-	uint32_t value;
 //	uint32_t checksum;
 }Logger_t;
 
