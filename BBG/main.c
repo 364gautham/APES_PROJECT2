@@ -1,3 +1,18 @@
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file main.c
+* BBG main file : It creates all threads for coomunication between TIVA 
+* and log data to log file.  
+* Socket task : Server for TCP socket for CLIENT API connection requests
+* @author Kiran Hegde and Gautham 
+* @date  4/29/2018
+* @tools vim editor
+*
+********************************************************************************************************/
+
+
 #include <stdio.h>
 #include <pthread.h>
 #include <string.h>
@@ -280,7 +295,7 @@ static void* communication(void *arg){
 	        } 
 
 
-
+	        /* sending vaue to client of conecton requests using message queue*/
 			client_call = log.log_source;
 			if(client_call == 18){
 
@@ -315,6 +330,7 @@ static void* logger(void *arg){
 	//char *filename = argv[1];
 	Logger_t log;
 	uint8_t val_hb = 3;
+	struct timespec tm1;
 	fp_log = fopen(filename, "wb");
 
 	logger_end =0 ;
@@ -350,7 +366,11 @@ static void* logger(void *arg){
 			printf("Din't receive message from commn thread and returned %d\n", errno);
 			exit(1);
 		}
-		    fprintf(fp_log, "%d\t\t",log.timestamp);
+		
+		
+		if(log.timestamp == NULL)
+			log.timestamp = tm1.tv_sec;
+		 fprintf(fp_log, "%d\t\t",log.timestamp);
         	fprintf(fp_log, "%d\t\t",log.log_level);
         	fprintf(fp_log, "%d\t\t", log.log_source);	
         	fprintf(fp_log, "%d\t",log.value);

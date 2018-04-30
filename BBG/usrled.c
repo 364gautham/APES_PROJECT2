@@ -1,3 +1,16 @@
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file userled.c
+* User led used to indicate errors through led 
+* @author Kiran Hegde and Gautham 
+* @date  4/29/2018
+* @tools vim editor
+*
+********************************************************************************************************/
+
+
 #include "usrled.h"
 
 int identification_led()

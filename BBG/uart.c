@@ -1,3 +1,16 @@
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file uart.c
+* UART initialization fucntin for BBG: using termios structure
+* @author Kiran Hegde and Gautham 
+* @date  4/29/2018
+* @tools vim editor
+*
+********************************************************************************************************/
+
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>

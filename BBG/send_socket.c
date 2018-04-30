@@ -1,3 +1,15 @@
+
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file main.c
+* Socketc : Cleint connection for API  requests
+* @author Kiran Hegde and Gautham 
+* @date  4/29/2018
+* @tools vim editor
+*
+********************************************************************************************************/
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>

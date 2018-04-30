@@ -1,3 +1,19 @@
+
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file log.c
+* @brief Log data from all files to log file
+* 
+* @author Kiran Hegde and Gautham 
+* @date  4/29/2018
+* @tools vim editor
+*
+********************************************************************************************************/
+
+
+
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
