@@ -1,8 +1,24 @@
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file main.c
+* @brief gesture control for home appliances
+*
+* This file implements a gesture controller for home appliances
+*
+* @author Kiran Hegde
+* @date  4/29/2018
+* @tools Code Composer Studio
+*
+********************************************************************************************************/
 
-
-/**
- * main.c
- */
+/********************************************************************************************************
+*
+* Header Files
+*
+********************************************************************************************************/
+#include <stdio.h>
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include <stdio.h>
@@ -23,6 +39,11 @@
 #include "driverlib/hibernate.h"
 #include "task.h"
 
+/********************************************************************************************************
+*
+* Global Variables
+*
+********************************************************************************************************/
 #define STACK_SIZE (1024)
 #define SYSTEM_CLOCK (32000000U)
 
@@ -33,10 +54,22 @@ TaskHandle_t MainTask, GestureTask, RelayTask, taskNotify1, HeartBeatTask, bbgRe
 uint8_t uin8bbgSend;
 SemaphoreHandle_t TermSem, HBGesture, HBRelay, bbgSendSem, bbgSocketSem;// i2cSem;
 
+/********************************************************************************************************
+*
+* @name LOG
+* @brief send data to BBG
+*
+* This function sends the structure LOGGER_T
+* data to BBG
+*
+* @param SOURCE, LEVEL, MSG, VALUE
+*
+* @return true on success and false on failure
+*
+********************************************************************************************************/
 bool LOG(uint32_t source, uint32_t level, char *ptr, uint32_t data)
 {
     if(!ptr)    return false;
-    //SysCtlDelay(1000000);
     xSemaphoreTake(bbgSendSem, portMAX_DELAY);
     Logger_t logging;
     memcpy(&logging, '\0', sizeof(Logger_t));
@@ -46,25 +79,30 @@ bool LOG(uint32_t source, uint32_t level, char *ptr, uint32_t data)
     logging.value = data;
     memcpy(logging.msg, '\0', MSG_SIZE);
     memcpy(logging.msg, ptr, MSG_SIZE);
-    UART_BBGSend((char *)&logging, sizeof(Logger_t));
+    BBGSend((char *)&logging, sizeof(Logger_t));
     memcpy(logging.msg, '\0', MSG_SIZE);
     xSemaphoreGive(bbgSendSem);
-    //SysCtlDelay(1000000);
     return true;
 }
 
+/* Configure Timer as RTC for timestamp*/
 void TimerConfig(void)
 {
+    /* Enable the peripheral */
     SysCtlPeripheralEnable(SYSCTL_PERIPH_HIBERNATE);
     HibernateEnableExpClk(g_ui32SysClock);
     HibernateClockConfig(HIBERNATE_OSC_LOWDRIVE);
     HibernateRTCEnable();
 }
+
+/* GPIO Interrupt Handler */
 void PortAIntHandler(void)
 {
     GPIOIntDisable(GPIO_PORTA_BASE, GPIO_INT_PIN_6);
     int_status = 1;
 }
+
+/*Enable the GPIO Interrupt*/
 void interruptEnable()
 {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOA);
@@ -80,6 +118,7 @@ void interruptEnable()
     GPIOIntEnable(GPIO_PORTA_BASE, GPIO_PIN_6);
 }
 
+/* Enable the GPIO for Relay */
 void RelayGPIOEnable()
 {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOK);
@@ -120,13 +159,25 @@ vApplicationStackOverflowHook(xTaskHandle *pxTask, char *pcTaskName)
     }
 }
 
+/********************************************************************************************************
+*
+* @name Startup test
+* @brief Initialisation
+*
+* This function does the startup test for the the sensor
+*
+* @param None
+*
+* @return true on success and false on failure
+*
+********************************************************************************************************/
 bool StartupTest()
 {
     TimerConfig();
     i2c_setup();
     if(!i2c_readID())
     {
-            UART_TerminalSend("Sensor is not connected Failed\n\r");
+            LOG(LOG_SOURCE_MAIN, LOG_LEVEL_ERROR, "[TIVA] SensorNotConnected", NULL);
             return false;
     }
     /*if(!i2c_read(APDS9960_ID, &value))
@@ -142,15 +193,29 @@ bool StartupTest()
     return true;
 }
 
+/********************************************************************************************************
+*
+* @name vRelayTask
+* @brief Task that controls relays
+*
+* This function controls the Relay operation based on gesture
+*
+* @param None
+*
+* @return None
+*
+********************************************************************************************************/
 void vRelayTask(void *parameters)
 {
     RelayGPIOEnable();
     uint32_t temp;
     for(;;)
     {
+        /* Wait for notification from Gesture Task */
         xTaskNotifyWait(0xFFFFFFFF, 0xFFFFFFFF, &temp, pdMS_TO_TICKS(500));
         if(temp != 0xFFFFFFFF)
         {
+            /*Relay 0 operation ON */
             if(temp == 0x01)
             {
                 if((GPIOPinRead(GPIO_PORTK_BASE, GPIO_PIN_0)&GPIO_PIN_0))
@@ -161,6 +226,7 @@ void vRelayTask(void *parameters)
                     LOG(LOG_SOURCE_RELAY, LOG_LEVEL_INFO, "[TIVA] Relay0 : turned on", NULL);
                 }
             }
+            /* Relay 1 control ON */
             else if(temp == 0x02)
             {
                 if((GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_0)&GPIO_PIN_0))
@@ -171,6 +237,7 @@ void vRelayTask(void *parameters)
                     LOG(LOG_SOURCE_RELAY, LOG_LEVEL_INFO, "[TIVA] Relay1 : turned on", NULL);
                 }
             }
+            /* Relay 0 off */
             else if(temp == 0x04)
             {
                 if(!(GPIOPinRead(GPIO_PORTK_BASE, GPIO_PIN_0)&GPIO_PIN_0))
@@ -181,6 +248,7 @@ void vRelayTask(void *parameters)
                     LOG(LOG_SOURCE_RELAY, LOG_LEVEL_INFO, "[TIVA] Relay0 : turned off", NULL);
                 }
             }
+            /* Relay 1 off */
             else if(temp == 0x08)
             {
                 if(!(GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_0)&GPIO_PIN_0))
@@ -191,12 +259,14 @@ void vRelayTask(void *parameters)
                     LOG(LOG_SOURCE_RELAY, LOG_LEVEL_INFO, "[TIVA] Relay1 : turned off", NULL);
                 }
             }
+            /* Both relay ON*/
             else if(temp == 0x10)
             {
                 GPIOPinWrite(GPIO_PORTK_BASE, GPIO_PIN_0, 1);
                 GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_0, 1);
                 LOG(LOG_SOURCE_RELAY, LOG_LEVEL_INFO, "[TIVA] Both Relays : turned on", NULL);
             }
+            /* Both Relay off */
             else if(temp == 0x20)
             {
                 GPIOPinWrite(GPIO_PORTK_BASE, GPIO_PIN_0, 0);
@@ -204,10 +274,23 @@ void vRelayTask(void *parameters)
                 LOG(LOG_SOURCE_RELAY, LOG_LEVEL_INFO, "[TIVA] Both Relays : turned off", NULL);
             }
         }
+        /* give the semaphore to heartbeat task*/
         xSemaphoreGive(HBRelay);
     }
 }
 
+/********************************************************************************************************
+*
+* @name free_function
+* @brief free the memory
+*
+* This function checls if a memory has been allocated, if yes, it destroys it
+*
+* @param None
+*
+* @return None
+*
+********************************************************************************************************/
 void vHeartBeatTask(void *parameters)
 {
     SysCtlDelay(100000);
@@ -217,6 +300,7 @@ void vHeartBeatTask(void *parameters)
     for(;;)
     {
         SysCtlDelay(100000);
+        /* Log the HeartBeat */
         LOG(LOG_SOURCE_COMM, LOG_LEVEL_HEARTBEAT, "[TIVA] Heart beat from TIVA", NULL);
         SysCtlDelay(100000);
         UART_TerminalSend("[Heartbeat]\n\r");
@@ -229,7 +313,7 @@ void vHeartBeatTask(void *parameters)
             hbGestCount++;
             if(hbGestCount > 5)
             {
-                LOG(LOG_SOURCE_COMM, LOG_LEVEL_HEARTBEAT, "[TIVA] No heartbeat from Gesture", NULL);
+                LOG(LOG_SOURCE_COMM, LOG_LEVEL_ERROR, "[TIVA] No HB from Gesture", NULL);
                 hbGestCount--;
             }
         }
@@ -242,13 +326,25 @@ void vHeartBeatTask(void *parameters)
             hbRelayCount++;
             if(hbRelayCount > 5)
             {
-                LOG(LOG_SOURCE_COMM, LOG_LEVEL_HEARTBEAT, "[TIVA] No heartbeat from Relay", NULL);
+                LOG(LOG_SOURCE_COMM, LOG_LEVEL_ERROR, "[TIVA] No HB from Relay", NULL);
                 hbRelayCount--;
             }
         }
     }
 }
 
+/********************************************************************************************************
+*
+* @name vbbgReceive
+* @brief receive from BBG
+*
+* This task receives characters from BBG and also handles socket APIs
+*
+* @param None
+*
+* @return None
+*
+********************************************************************************************************/
 void vbbgReceive(void *parameters)
 {
     for(;;)
@@ -256,10 +352,12 @@ void vbbgReceive(void *parameters)
         if(xSemaphoreTake(bbgSocketSem, pdMS_TO_TICKS(5000)) == pdTRUE)
         {
             char recBuffer;
-            UART_BBGReceive(&recBuffer);
+            /* receive from BBG */
+            BBGReceive(&recBuffer);
             uint8_t status;
             switch((uint8_t)recBuffer)
             {
+                /* Relay 0 Status */
                 case 0x01:
                     if((GPIOPinRead(GPIO_PORTK_BASE, GPIO_PIN_0)&GPIO_PIN_0))
                     {
@@ -272,77 +370,84 @@ void vbbgReceive(void *parameters)
                         UART_TerminalSend("API CALL 2\n\r");
                     }
                     break;
+                    /* Relay 1 status*/
                 case 0x02:
                     if((GPIOPinRead(GPIO_PORTM_BASE, GPIO_PIN_0)&GPIO_PIN_0))
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO,"[TIVA] Status Relay1 : on", 1);
-                        UART_TerminalSend("API CALL 3\n\r");
+                        //UART_TerminalSend("API CALL 3\n\r");
                     }
                     else
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Status Relay1 : turned off", 0);
-                        UART_TerminalSend("API CALL 4\n\r");
+                        //UART_TerminalSend("API CALL 4\n\r");
                     }
                     break;
+                    /* Read Gesture Sensor ID */
                 case 0x03:
                     if( !i2c_read(APDS9960_ID, &status) )
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Reading ID Failed", 0);
-                        UART_TerminalSend("API CALL 5\n\r");
+                        //UART_TerminalSend("API CALL 5\n\r");
                     }
                     else
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Reading ID Success", status);
-                        UART_TerminalSend("API CALL 6\n\r");
+                        //UART_TerminalSend("API CALL 6\n\r");
                     }
                     break;
+                    /* Disable gesture sensor */
                 case 0x05:
                     if(!disableGestureSensor())
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Gesture Disable Failed", 0);
-                        UART_TerminalSend("API CALL 7\n\r");
+                        //UART_TerminalSend("API CALL 7\n\r");
                     }
                     else
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] GestureDisableSuccess", 1);
-                        UART_TerminalSend("API CALL 8\n\r");
+                        //UART_TerminalSend("API CALL 8\n\r");
                     }
                     break;
+                    /* set gesture gain */
                 case 0x06:
                     if(!setGestureGain(GGAIN_4X))
                     {
-                        UART_TerminalSend("API CALL 9\n\r");
+                        //UART_TerminalSend("API CALL 9\n\r");
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Setting Gain Failed", 0);
                     }
                     else
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] SettingGainSuccess", 1);
-                        UART_TerminalSend("API CALL 10\n\r");
+                        //UART_TerminalSend("API CALL 10\n\r");
                     }
                     break;
+                    /* enable gesture mode */
                 case 0x04:
                     if( !setMode(GESTURE, 1) )
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] EnableGestureFailed", 0);
-                        UART_TerminalSend("API CALL 11\n\r");
+                        //UART_TerminalSend("API CALL 11\n\r");
                     }
                     else
                     {
                         LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Setting Gain Success", 1);
-                        UART_TerminalSend("API CALL 12\n\r");
+                        //UART_TerminalSend("API CALL 12\n\r");
                     }
                     break;
+                    /* turn on both relays */
                 case 0x07:
                     GPIOPinWrite(GPIO_PORTK_BASE, GPIO_PIN_0, 1);
                     GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_0, 1);
                     LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Both Relays: turned on", 1);
-                    UART_TerminalSend("API CALL 13\n\r");
+                    //UART_TerminalSend("API CALL 13\n\r");
                     break;
                 case 0x08:
+                    /* turn off both relays */
                     GPIOPinWrite(GPIO_PORTK_BASE, GPIO_PIN_0, 0);
                     GPIOPinWrite(GPIO_PORTM_BASE, GPIO_PIN_0, 0);
                     LOG(LOG_SOURCE_CLIENT, LOG_LEVEL_INFO, "[TIVA] Both Relays: turned off", 1);
-                    UART_TerminalSend("API CALL 14\n\r");
+                    //UART_TerminalSend("API CALL 14\n\r");
                     break;
                 case 0x4D:
                     UART_TerminalSend("[BBG] HeartBeat from BBG\n\r");
@@ -359,6 +464,18 @@ void vbbgReceive(void *parameters)
     }
 }
 
+/********************************************************************************************************
+*
+* @name gesture task
+* @brief gesture recognition
+*
+* This function recognises the gesture and notifies the relay task
+*
+* @param None
+*
+* @return None
+*
+********************************************************************************************************/
 void vGestureTask(void *parameters)
 {
     UART_TerminalSend("GestureTaskCreated\n\r");
@@ -424,6 +541,7 @@ void vGestureTask(void *parameters)
     }
 }
 
+/* Create all tasks */
 bool CreateTasks()
 {
     if(xTaskCreate(vGestureTask, "GestureTask", STACK_SIZE, NULL, 1, &GestureTask) == pdFALSE)
@@ -449,6 +567,7 @@ bool CreateTasks()
     return true;
 }
 
+/* Initialize all the semaphores used for sync and mutual exclusion */
 bool SemaphoreInit()
 {
     TermSem = xSemaphoreCreateBinary();
@@ -460,6 +579,19 @@ bool SemaphoreInit()
     //xSemaphoreGive(bbgSendSem);
     return true;
 }
+
+/********************************************************************************************************
+*
+* @name main
+* @brief creates tasks and schedules it
+*
+* This function calls the create tasks and schedules it
+*
+* @param None
+*
+* @return 0 on success
+*
+********************************************************************************************************/
 int main(void)
 {
     uin8bbgSend = 1;
@@ -467,6 +599,7 @@ int main(void)
     g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_OSC_MAIN | SYSCTL_XTAL_25MHZ | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), SYSTEM_CLOCK);
     if(!ConfigureUART_terminal()) return -1;
     SemaphoreInit();
+    i2c_BBGSetup();
     if(!ConfigureUART_BBG())
     {
         UART_TerminalSend("BBG UART failed\r\n");
@@ -478,7 +611,7 @@ int main(void)
     LOG(LOG_SOURCE_MAIN, LOG_LEVEL_INIT, "[TIVA] Gesture Application", NULL);
     if(!StartupTest())
     {
-        LOG(LOG_SOURCE_MAIN, LOG_LEVEL_INIT, "[TIVA] StartUp test failed", NULL);
+        LOG(LOG_SOURCE_MAIN, LOG_LEVEL_ERROR, "[TIVA] StartUp test failed", NULL);
         return -1;
     }
     LOG(LOG_SOURCE_MAIN, LOG_LEVEL_INIT, "[TIVA] StartUp Test Done", NULL);

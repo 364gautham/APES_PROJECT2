@@ -1,10 +1,23 @@
-/*
- * gesture_sensor.c
- *
- *  Created on: Apr 24, 2018
- *      Author: KiranHegde
- */
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file gesture_sensor.c
+* @brief gesture sensor functions
+*
+* This file implements gesture recognition functions
+*
+* @author Kiran Hegde
+* @date  4/29/2018
+* @tools Code Composer Studio
+*
+********************************************************************************************************/
 
+/********************************************************************************************************
+*
+* Header Files
+*
+********************************************************************************************************/
 #include <stdint.h>
 #include <stdbool.h>
 #include "include/i2c_comm.h"

@@ -25,6 +25,7 @@ src/uart_comm.obj: C:/Users/kiran/workspace_v7/Gesture_sensor/driverlib/interrup
 src/uart_comm.obj: C:/Users/kiran/workspace_v7/Gesture_sensor/include/uart_comm.h
 src/uart_comm.obj: C:/Users/kiran/Downloads/FreeRTOSv10.0.1/FreeRTOS/Source/include/semphr.h
 src/uart_comm.obj: C:/Users/kiran/Downloads/FreeRTOSv10.0.1/FreeRTOS/Source/include/queue.h
+src/uart_comm.obj: C:/Users/kiran/workspace_v7/Gesture_sensor/include/i2c_comm.h
 src/uart_comm.obj: C:/Users/kiran/workspace_v7/Gesture_sensor/include/logger.h
 src/uart_comm.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include/time.h
 src/uart_comm.obj: C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include/abi_prefix.h
@@ -56,6 +57,7 @@ C:/Users/kiran/workspace_v7/Gesture_sensor/driverlib/interrupt.h:
 C:/Users/kiran/workspace_v7/Gesture_sensor/include/uart_comm.h: 
 C:/Users/kiran/Downloads/FreeRTOSv10.0.1/FreeRTOS/Source/include/semphr.h: 
 C:/Users/kiran/Downloads/FreeRTOSv10.0.1/FreeRTOS/Source/include/queue.h: 
+C:/Users/kiran/workspace_v7/Gesture_sensor/include/i2c_comm.h: 
 C:/Users/kiran/workspace_v7/Gesture_sensor/include/logger.h: 
 C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include/time.h: 
 C:/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.4.LTS/include/abi_prefix.h: 

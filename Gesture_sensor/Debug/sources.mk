@@ -118,7 +118,7 @@ Source/portable/Common \
 Source/portable/MemMang \
 ccs/Debug \
 driverlib \
-ewarm/Exe \
+gcc/ewarm/Exe \
 gcc \
 rvmdk \
 src \

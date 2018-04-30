@@ -79,7 +79,7 @@ RMDIR := RMDIR /S/Q
 -include Source/portable/MemMang/subdir_vars.mk
 -include ccs/Debug/subdir_vars.mk
 -include driverlib/subdir_vars.mk
--include ewarm/Exe/subdir_vars.mk
+-include gcc/ewarm/Exe/subdir_vars.mk
 -include gcc/subdir_vars.mk
 -include rvmdk/subdir_vars.mk
 -include src/subdir_vars.mk
@@ -90,7 +90,7 @@ RMDIR := RMDIR /S/Q
 -include Source/portable/MemMang/subdir_rules.mk
 -include ccs/Debug/subdir_rules.mk
 -include driverlib/subdir_rules.mk
--include ewarm/Exe/subdir_rules.mk
+-include gcc/ewarm/Exe/subdir_rules.mk
 -include gcc/subdir_rules.mk
 -include rvmdk/subdir_rules.mk
 -include src/subdir_rules.mk

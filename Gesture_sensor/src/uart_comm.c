@@ -1,10 +1,23 @@
-/*
- * uart.c
- *
- *  Created on: Apr 26, 2018
- *      Author: KiranHegde
- */
+/*******************************************************************************************************
+*
+* UNIVERSITY OF COLORADO BOULDER
+*
+* @file uart_comm.c
+* @brief UART Communication functions
+*
+* This file implements all the functions for UART Communication
+*
+* @author Kiran Hegde
+* @date  4/29/2018
+* @tools Code Composer Studio
+*
+********************************************************************************************************/
 
+/********************************************************************************************************
+*
+* Header Files
+*
+********************************************************************************************************/
 #include "FreeRTOS.h"
 #include <stdio.h>
 #include <stdint.h>
@@ -18,11 +31,14 @@
 #include "driverlib/uart.h"
 #include "driverlib/interrupt.h"
 #include "include/uart_comm.h"
+#include "include/i2c_comm.h"
 #include "include/logger.h"
 #include <string.h>
 #include "semphr.h"
 #include <stdlib.h>
+#define UART
 
+/* Interrupt Handler */
 void
 UARTIntHandler(void)
 {
@@ -41,9 +57,10 @@ UARTIntHandler(void)
     // Loop while there are characters in the receive FIFO.
     //
     //if((ui32Status & UART_INT_RX)==UART_INT_RX)
-    xSemaphoreGive(bbgSocketSem);
+    xSemaphoreGiveFromISR(bbgSocketSem, NULL);
 }
 
+/* Configure the terminal */
 bool ConfigureUART_terminal(void)
 {
     //
@@ -72,6 +89,7 @@ bool ConfigureUART_terminal(void)
     return true;
 }
 
+/* Configure UART for BBG */
 bool ConfigureUART_BBG(void)
 {
     //
@@ -102,7 +120,7 @@ bool ConfigureUART_BBG(void)
     // Initialize the UART for console I/O.
     //
 
-    UARTConfigSetExpClk(UART6_BASE, g_ui32SysClock, 115200,
+    UARTConfigSetExpClk(UART6_BASE, g_ui32SysClock, 57600,
                                 (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE |
                                  UART_CONFIG_PAR_NONE));
 
@@ -112,11 +130,13 @@ bool ConfigureUART_BBG(void)
     return true;
 }
 
-bool UART_BBGSend(char *ptr, uint8_t len)
+/* Send to BBG */
+bool BBGSend(char *ptr, uint8_t len)
 {
     if(!ptr)    return false;
     uint8_t status;
     while(UARTBusy(UART6_BASE));
+    /* if BBG connection */
     if(!uin8bbgSend)
     {
         Logger_t temp = *(Logger_t *)ptr;
@@ -142,28 +162,46 @@ bool UART_BBGSend(char *ptr, uint8_t len)
     }
     else
     {
+#ifdef UART
         while(len--)
         {
             UARTCharPut(UART6_BASE, *ptr++);
         }
         status = true;
+#endif
+        /* Compile time switch for I2C communication */
+#ifdef I2C
+        if(!i2c_BBGReceive(ptr, len))
+        {
+            status = true;
+        }
+#endif
     }
     return status;
 }
 
-bool UART_BBGReceive(char *ptr)
+/* Receive from BBG */
+bool BBGReceive(char *ptr)
 {
     if(!ptr)    return false;
-    //while(UARTCharsAvail(UART6_BASE))
-    {
-        *ptr = UARTCharGetNonBlocking(UART6_BASE);
-    }
-    return true;
+    bool status;
+#ifdef UART
+    *ptr = UARTCharGetNonBlocking(UART6_BASE);
+    status = true;
+#endif
+#ifdef I2C
+    i2c_BBGReceive(ptr, 1);
+    status = true;
+#endif
+    return status;
+
 }
 
+/* Send the data to terminal */
 bool UART_TerminalSend(char *ptr)
 {
     if(!ptr)    return false;
+    /* take semaphore */
     xSemaphoreTake(TermSem, portMAX_DELAY);
     uint32_t size = strlen(ptr);
     while(size--)
